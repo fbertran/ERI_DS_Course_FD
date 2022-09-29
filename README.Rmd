@@ -1,7 +1,7 @@
 ---
 title: "ERI Data Science. Fitting distribution"
 author: "Frédéric Bertrand"
-date: "16 mars 2022"
+date: "29 september 2022"
 output: 
   github_document:
     fig_height: 3

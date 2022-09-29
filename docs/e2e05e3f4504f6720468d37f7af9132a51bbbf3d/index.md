@@ -1,7 +1,7 @@
 ERI Data Science. Fitting distribution
 ================
 Frédéric Bertrand
-16 mars 2022
+29 september 2022
 
 ------------------------------------------------------------------------
 
