@@ -384,7 +384,7 @@ The corrected statistics $W^*$ and $A^*$ are given by
 W^∗&=&{n\int_{-\infty}^{+\infty}\left\{F_n(x)−F(x;{\hat \theta}_n)\right\}^2dF(x;{\hat \theta}_n)}\left(1+\frac{0.5}{n}\right)\\
 &=&W^2\left(1+\frac{0.5}{n}\right),
 &&\\
-A^∗&=&\left\{n\int_{-\infty}^{+\infty}\frac{\{F_n(x)−F(x;{\hat \theta}_n)\}^2}{{F(x;{\hat \theta}_n)(1−F(x;{\hat \theta}_n))}}dF(x;{\hat \theta}_n)\right\}\left(1+\frac{0.75}{n}+\frac{2.25}{n^2}\right)\\
+A^∗&=&\left\{n\int_{-\infty}^{+\infty}\frac{\{F_n(x)−F(x;{\hat \theta}_n)\}^2}{F(x;{\hat \theta}_n)(1−F(x;{\hat \theta}_n))}dF(x;{\hat \theta}_n)\right\}\left(1+\frac{0.75}{n}+\frac{2.25}{n^2}\right)\\
 &=&A^2\left(1+\frac{0.75}{n}+\frac{2.25}{n^2}\right).
 \end{eqnarray}
 
