@@ -1,0 +1,269 @@
+---
+title: "Practical session on fitting distributions"
+author: "F. Bertrand"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    toc: true
+#    css: style.css
+    number_sections: true
+    highlight: github
+    fig_height: 8
+    fig_width: 12
+    includes:
+      before_body: header.html
+      after_body: footer.html
+  html_document:
+    toc: true
+    number_sections: true
+    fig_height: 8
+    fig_width: 12
+    includes:
+      after_body: footer.html
+  pdf_document:
+    toc: true
+    number_sections: true
+    fig_height: 4
+    fig_width: 6
+  word_document:
+    toc: true
+    fig_height: 8
+    fig_width: 12
+---
+
+
+# Introduction
+
+## Package installation
+
+Let's start by installing the packages we will need in the following.
+```{r}
+if(!require(devtools)){install.packages("devtools");library(devtools)}
+if(!require(ggmap)){install.packages("ggmap");library(ggmap)}
+```
+
+```{r, include=FALSE, eval=FALSE}
+if(!require(ggmap)){
+  devtools::install_github("dkahle/ggmap", ref = "tidyup")
+  library(ggmap)
+  } else {
+    if(!(packageDescription("ggmap")$RemoteType=="github")){
+      devtools::install_github("dkahle/ggmap", ref = "tidyup")
+      library(ggmap)}
+    }
+```
+
+## Recovery of hydrolic data 
+
+The data to be studied were presented in [Dione (1992)](https://tinyurl.com/y564t3jm). 
+```{r}
+station_data <- read.csv("https://tinyurl.com/y2kosb2y")
+longlat <- read.csv("https://tinyurl.com/yy9f9bsf")
+```
+
+The `KIDIRA`, `GOURBA`(ssi) and `FADOU`(gou) columns correspond to annual flows between 1903 and 1989. The columns `GOUc` and `KILIc` correspond to complementary hydrolic data.
+
+The `dms2dd` function of the `biogeo` package allows to convert coordinates known as longitude and latitude expressed in degrees, minutes and seconds into decimal degrees.
+
+```{r}
+if(!require(biogeo)){install.packages("biogeo");library(biogeo)}
+latdd<-with(longlat,dms2dd(LATDEG,LATMIN,0,LATNS))
+latdd
+min(latdd)
+max(latdd)
+longdd<-with(longlat,dms2dd(LONGDEG,LONGMIN,0,LONGOE))
+min(longdd)
+max(longdd)
+typesite <- (longlat$NATURE.DU.SITE=="STATIONS PLUVIOMETRIQUES")+1
+df_dd_stations <- data.frame(cbind(latdd,longdd,typesite))
+```
+
+
+## Graphic visualization of the position of the measuring stations.
+
+Recovery of geographical data from the Internet.
+
+`bbox` = *bounding box*.
+
+```{r}
+min(longdd)
+max(longdd)
+min(latdd)
+max(latdd)
+faleme <- get_stamenmap(bbox = c(left = min(longdd)*1.05, bottom = min(latdd)/1.05, right = max(longdd)/1.05, top = max(latdd)*1.05), 
+zoom = 8)
+```
+
+Several types of land are available.
+```{r}
+maptypes = c("terrain", "terrain-background", "terrain-labels", 
+             "terrain-lines", "toner", "toner-2010", "toner-2011", 
+             "toner-background", "toner-hybrid", "toner-labels", 
+             "toner-lines", "toner-lite", "watercolor")
+```
+
+Retrieve another example of a map terrain type.
+```{r}
+faleme_toner2011 <- get_stamenmap(bbox = c(left = min(longdd)*1.05, bottom = min(latdd)/1.05, right = max(longdd)/1.05, top = max(latdd)*1.05), zoom = 8, maptype="toner-2011")
+```
+
+Adding the stations to the two types of maps of the region.
+```{r}
+ggmap(faleme) + geom_point(
+  aes(x = longdd, y = latdd, color=typesite),
+  data = df_dd_stations, colour = c("red","green")[typesite], size = 3
+)
+```
+
+
+```{r}
+ggmap(faleme_toner2011) + geom_point(
+  aes(x = longdd, y = latdd, color=typesite),
+  data = df_dd_stations, colour = c("red","green")[typesite], size = 3
+)
+```
+
+# Adjustments to hydrological data
+
+```{r}
+if(!require(fitdistrplus)){install.packages("fitdistrplus");library(fitdistrplus)}
+```
+
+## KIDIRA
+
+Représentations des données.
+```{r}
+plotdist(station_data$KIDIRA) 
+```
+
+```{r}
+descdist(station_data$KIDIRA, boot = 1000)
+```
+
+### Some examples of fitting distributions to data.
+
+#### Log-normal
+
+```{r}
+KIDIRA.ln <- fitdist(station_data$KIDIRA, "lnorm")
+summary(KIDIRA.ln)
+plot(KIDIRA.ln)
+```
+
+#### Gumbel
+
+```{r}
+if(!require(actuar)){install.packages("actuar");library(actuar)}
+KIDIRA.gumbel <- fitdist(station_data$KIDIRA, "gumbel", start=list(alpha=10, scale=10))
+summary(KIDIRA.gumbel)
+plot(KIDIRA.gumbel)
+```
+
+#### Log-logistic
+
+```{r}
+KIDIRA.ll <- fitdist(station_data$KIDIRA, "llogis", start = list(shape = 1, scale = 10))
+summary(KIDIRA.ll)
+plot(KIDIRA.ll)
+```
+
+#### Pareto
+
+```{r}
+KIDIRA.P <- fitdist(station_data$KIDIRA, "pareto", start = list(shape = 1, scale = 10))
+summary(KIDIRA.P)
+plot(KIDIRA.P)
+```
+
+#### Burr
+
+```{r}
+KIDIRA.B <- fitdist(station_data$KIDIRA, "burr", start = list(shape1 = 1, shape2 = 1))
+summary(KIDIRA.B)
+plot(KIDIRA.B)
+```
+
+### Graphical comparison of the fits
+
+By their densities.
+```{r}
+denscomp(lapply(paste("KIDIRA",c("ln","gumbel","ll","P","B"),sep="."),get), legendtext = c("lognormal","gumbel", "loglogistic", "Pareto", "Burr"))
+```
+
+By quantile-quantile diagrams.
+```{r}
+qqcomp(lapply(paste("KIDIRA",c("ln","gumbel","ll","P","B"),sep="."),get), legendtext = c("lognormal","gumbel", "loglogistic", "Pareto", "Burr"))
+```
+
+By their distribution functions.
+```{r}
+cdfcomp(lapply(paste("KIDIRA",c("ln","gumbel","ll","P","B"),sep="."),get), legendtext = c("lognormal","gumbel", "loglogistic", "Pareto", "Burr"))
+```
+
+By probability-probability diagrams.
+```{r}
+ppcomp(lapply(paste("KIDIRA",c("ln","gumbel","ll","P","B"),sep="."),get), legendtext = c("lognormal","gumbel", "loglogistic", "Pareto", "Burr"))
+```
+
+### Numerical comparison of fits
+
+```{r}
+gofstat(lapply(paste("KIDIRA",c("ln","gumbel","ll","P","B"),sep="."),get), fitnames = c("lognormal","gumbel", "loglogistic", "Pareto", "Burr"))
+```
+
+
+## Other distributions
+
+The initial study suggests testing the fit to Galton's (= lognormal), Goodrich's, Pearson's 3, Gumbel, ...
+
+## Other techniques
+
+Apply alternative distribution selection approaches to these data.
+
+
+# Applications to other variables.
+
+```{r}
+plotdist(station_data$GOURBA) 
+```
+
+```{r}
+plotdist(station_data$FADOU) 
+```
+
+```{r}
+plotdist(station_data$GOUc) 
+```
+
+```{r}
+plotdist(station_data$KILIc) 
+```
+
+```{r}
+descdist(station_data$GOURBA, boot = 1000)
+```
+
+```{r}
+descdist(station_data$FADOU, boot = 1000)
+```
+
+Valeurs annuelles cumulées.
+```{r}
+descdist(station_data$GOUc, boot = 1000)
+```
+
+```{r}
+descdist(station_data$KILIc, boot = 1000)
+```
+
+# Mystery data
+
+Which distribution(s) is/are compatible with this data?
+
+```{r}
+donnees <- read.csv("https://tinyurl.com/yxn9udgt")
+str(donnees)
+```
+
+

@@ -1,0 +1,53 @@
+---
+title: "ERI Data Science. Fitting distribution"
+author: "Frédéric Bertrand"
+date: "16 mars 2022"
+output: 
+  github_document:
+    fig_height: 3
+    fig_width: 5
+  html_document:
+    fig_height: 3
+    fig_width: 5
+  pdf_document:
+    fig_height: 3
+    fig_width: 5
+  word_document:
+    fig_height: 3
+    fig_width: 5
+---
+
+```{r, setup, include=FALSE}
+require(mosaic)   # Load additional packages here 
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+```
+
+***
+**Specific objectivess**:
+
+By the end of this session, you will
+
+- Know how to select a distribution to fit data
+- Know how to fit a distribution to data
+- know how to assess goodness of fit of a distribution to data
+
+***
+
+- Course materials. [DistFit.html](Supports/DistFit.html). 
+
+- Distribution tree. [distributions.png](Supports/distributions.png). 
+
+- Feller Pareto family. [fellerpareto.png](Supports/fellerpareto.png). 
+
+- Avalanche dataset. [avalanch.dat](Supports/avalanch.dat). 
+
+- Practical session. [TP_fitting_distributions.html](Supports/TP_fitting_distributions.html) 
+
+
+
+
+
+
+
